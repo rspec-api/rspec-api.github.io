@@ -1,0 +1,54 @@
+/* TYPOGRAPHY */
+body        {font-family: Helvetica, Arial, sans-serif}
+
+body        {font-size: 0.85em; line-height: 1.5em}
+header      {font-size: 1.40em; line-height: 1.4em}
+h1          {font-size: 1.50em}
+h2          {font-size: 1.20em}
+code        {font-size: 1.15em; line-height: 1.2em}
+li          {font-size: 1.00em; line-height: 1.7em}
+
+/* COLORS */
+body           {background-color: #ffffff; color: #393939}
+pre.request    {background-color: #FAFAFB; color: #393939}
+ul code        {background-color: #f9f9f9; color: #52595d}
+code .string   {color: #3e7b0b}
+code .number   {color: #133ed7}
+code .symbol   {color: #d2382d}
+code .constant {color: #6b77f8}
+code .success  {color: #009926}
+h1             {border-color: #cccccc; border-bottom-style: solid}
+pre            {border-color: #cacaca; border-style: solid}
+ul code        {border-color: #cccccc; border-style: solid}
+
+/* SIZES */
+header,
+article       {width: 720px;}
+header img    {width: 48px; height: 48px;}
+
+/* LAYOUT */
+header img     {float: right}
+header         {clear: both}
+pre            {overflow:auto}
+ul code        {display: inline-block}
+.ribbon        {position: fixed; top: 0; left: 0}
+
+body, header,
+article        {margin-left: auto; margin-right: auto}
+body           {margin-top: 5px; padding: 0px}
+header         {margin-top: 10px; margin-bottom: 40px}
+header img     {margin-left: 24px}
+p              {margin: 1em 0}
+h1             {margin: 2em 0 1em; padding: .5em 0}
+h2             {margin: 2.5em auto 1em}
+ul             {margin: 1.5em}
+pre            {margin: 0px; padding: 10px}
+ul code        {padding: 0px 3px}
+
+h1             {border-bottom-width: 1px}
+pre, ul code   {border-width: 1px}
+iframe, img    {border: 0px}
+
+/* Browser-specific properties */
+pre, code {border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px;}
+pre, code {background-clip: padding-box; -moz-background-clip: padding; -webkit-background-clip: padding-box;}

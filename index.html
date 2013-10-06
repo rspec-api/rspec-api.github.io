@@ -1,74 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>An introduction to RSpec API</title>
+  <link href="rspec-api.css" media="all" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <header>
+    <img src="rspec-api-logo.png" alt="RSpec API">
+    <p>When you write a web API, you make a promise to the world.<br />
+       RSpec API helps you keep your promise.</p>
+  </header>
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Rspec API : " />
+  <article>
+    <h1>A basic example</h1>
+    <p>You wrote a simple Concerts API that only accepts one request:</p>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <pre class="request"><code>GET /concerts</code></pre>
 
-    <title>Rspec API</title>
-  </head>
+    <p>and responds with this kind of data:</p>
 
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/rspec-api">View on GitHub</a>
-
-          <h1 id="project_title">Rspec API</h1>
-          <h2 id="project_tagline"></h2>
-
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+    <pre><code>Status: 200 OK
+Content-Type: application/json; charset=utf-8
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+    <pre><code>[
+  {
+    <span class="string">"where"</span>: <span class="string">"Woodstock"</span>, <span class="string">"year"</span>: <span class="number">1969</span>,
+    <span class="string">"performers"</span>: [
+      {<span class="string">"name"</span>: <span class="string">"Jimi Hendrix"</span>, <span class="string">"website"</span>: <span class="string">"http://jimihendrix.com"</span>},
+      {<span class="string">"name"</span>: <span class="string">"Janis Joplin"</span>, <span class="string">"website"</span>: <span class="string">"http://janisjoplin.com"</span>}
+    ]
+  },
+  {
+    <span class="string">"where"</span>: <span class="string">"Coachella"</span>, <span class="string">"year"</span>: <span class="number">2013</span>,
+    <span class="string">"performers"</span>: [
+      {<span class="string">"name"</span>: <span class="string">"Grizzly Bear"</span>, <span class="string">"website"</span>: <span class="number">nil</span>}
+    ]
+  }
+]</code></pre>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+    <p>Such a simple API is inherently making many <strong>promises</strong> to its consumers.<br />
+       Even though the returned <em>data</em> might differ from call to call, the consumer should always <em>expect</em>:</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+    <ul>
+      <li>the status code to be <code>200</code></li>
+      <li>the headers to include a <code>JSON content-type</code> indication</li>
+      <li>the body to be an <code>array</code> of items, each representing a concert</li>
+      <li>each concert to have a <code>where</code> attribute with a <code>string</code> value</li>
+      <li>each concert to have a <code>year</code> attribute with an <code>integer</code> value</li>
+      <li>each concert to have an <code>array</code> of performers</li>
+      <li>each performer to have a <code>name</code> attribute with a <code>string</code> value</li>
+      <li>each performer to have a <code>website</code> attribute with a <code>URL</code> or <code>nil</code> value</li>
+    </ul>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+    <h2>The power of RSpec API to the rescue</h2>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+    <p>RSpec API provides a concise and readable way to express the set of promises listed above:</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+    <pre><code>resource <span class="string">'Concerts'</span>, <span class="symbol">format:</span> <span class="symbol">:json</span> do
+  has_attribute <span class="symbol">:where</span>, <span class="symbol">:string</span>
+  has_attribute <span class="symbol">:year</span>, <span class="symbol">:integer</span>
+  has_attribute <span class="symbol">:performers</span>, <span class="symbol">:array</span> do
+    has_attribute <span class="symbol">:name</span>, <span class="symbol">:string</span>
+    has_attribute <span class="symbol">:website</span>, <span class="symbol">:url</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
+  end
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+  get <span class="string">'/concerts'</span>, <span class="symbol">array:</span> <span class="constant">true</span> do
+    request <span class="string">'Getting a list of concerts'</span> do
+      respond_with <span class="symbol">:ok</span>
+    end
+  end
+end</code></pre>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+    <p>This snippet code is not only a meaningful <strong>documentation</strong> of the promises set by the API.<br />
+       It is also a <strong>test</strong> that can be run by RSpec to ensure the promises are kept:</p>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
+    <pre class="request"><code>$ rspec spec/features/concerts_spec.rb</code></pre>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+    <pre><code>Concerts
+  GET /concerts
+    by default
+      responds with a status code that
+        <span class="success">should be 200</span>
+      responds with headers that
+        <span class="success">should include 'Content-Type': 'application/json; charset=utf-8'</span>
+      responds with a body that
+        <span class="success">should be a JSON Array</span>
+        <span class="success">should include the attribute "where" with a string value</span>
+        <span class="success">should include the attribute "year" with an integer value</span>
+        <span class="success">should include the attribute "performers" array, where each item</span>
+          <span class="success">should include the attribute "name" with a string value</span>
+          <span class="success">should include the attribute "website" with a URL or nil value</span></code></pre>
 
-    
+    <h1>Want to know more?</h1>
 
-  </body>
+    <p>RSpec API aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
+    <p>It is still under development, and you can follow its progress by <a href="http://github.com/rspec-api/rspec-api">checking out the code on Github</a>.</p>
+    <p>Other features not included in the basic examples above are:</p>
+
+    <ul>
+      <li>support for other HTTP verbs, e.g.: <code>POST /concerts</code></li>
+      <li>support for nested routes, e.g.: <code>GET /locations/woodstock/concerts</code></li>
+      <li>support for optional filters, e.g.: <code>GET /concerts?when=1969</code></li>
+      <li>support for optional sorting, e.g.: <code>GET /concerts?sort=when</code></li>
+      <li>support for optional pagination, e.g.: <code>GET /concerts?page=2</code></li>
+      <li>support for more attribute types, such as <code>boolean</code></li>
+      <li>support for remote web APIs, e.g.: <code>GET https://api.github.com/users/claudiob/repos</code></li>
+    </ul>
+
+    <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=watch" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=fork" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=claudiob&amp;type=follow" width="132" height="20"></iframe>
+  </article>
+  <a href="https://github.com/rspec-api/rspec-api">
+    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpec API on GitHub">
+  </a>
+</body>
 </html>
