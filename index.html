@@ -13,6 +13,11 @@
   </header>
 
   <article>
+    <nav class="prev">
+    </nav>
+    <nav class="next">
+      <a href="github.html" alt="The GitHub API example">Page 2 &rarr;</a>
+    </nav>
     <h1>A basic example</h1>
     <p>You wrote a simple Concerts API that only accepts one request:</p>
 
@@ -93,6 +98,16 @@ end</code></pre>
           <span class="success">should include the attribute "name" with a string value</span>
           <span class="success">should include the attribute "website" with a URL or nil value</span></code></pre>
 
+        <p>Now, go and run this code for yourself, then tell me what you think.
+           All you need is RSpec API (<a href="https://github.com/rspec-api/rspec-api#a-basic-example">instructions</a>).</p>
+  </article>
+
+  <footer>
+    <nav class="prev">
+    </nav>
+    <nav class="next">
+      <a href="github.html" alt="The GitHub API example">Page 2 &rarr;</a>
+    </nav>
     <h1>Want to know more?</h1>
 
     <p>RSpec API aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
@@ -101,12 +116,12 @@ end</code></pre>
 
     <ul>
       <li>support for other HTTP verbs, e.g.: <code>POST /concerts</code></li>
-      <li>support for nested routes, e.g.: <code>GET /locations/woodstock/concerts</code></li>
-      <li>support for optional filters, e.g.: <code>GET /concerts?when=1969</code></li>
-      <li>support for optional sorting, e.g.: <code>GET /concerts?sort=when</code></li>
-      <li>support for optional pagination, e.g.: <code>GET /concerts?page=2</code></li>
       <li>support for more attribute types, such as <code>boolean</code></li>
-      <li>support for remote web APIs, e.g.: <code>GET https://api.github.com/users/claudiob/repos</code></li>
+      <li>support for nested routes, e.g.: <code>GET /locations/woodstock/concerts</code></li>
+      <li>support for filters, e.g.: <code>GET /concerts?when=1969</code></li>
+      <li>support for sorting, e.g.: <code>GET /concerts?sort=when</code></li>
+      <li>support for pagination, e.g.: <code>GET /concerts?page=2</code></li>
+      <li>support for JSONP callbacks, e.g.: <code>GET /concerts?callback=my_function</code></li>
     </ul>
 
     <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>

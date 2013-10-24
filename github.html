@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>An introduction to RSpec API</title>
+  <link href="rspec-api.css" media="all" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <header>
+    <img src="rspec-api-logo.png" alt="RSpec API">
+    <p>When you write a web API, you make a promise to the world.<br />
+       RSpec API helps you keep your promise.</p>
+  </header>
+
+  <article>
+    <nav class="prev">
+      <a href="index.html" alt="1. A basic example">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+    </nav>
+    <h1>The GitHub API example</h1>
+    <p>GitHub provides an extensive API. For instance, you can list the watchers of a repository with:</p>
+
+    <pre class="request"><code>GET https://api.github.com/repos/:owner/:repo/subscribers</code></pre>
+
+    <p>What response should you expect?
+       According to the <a href="http://developer.github.com/v3/activity/watching/#list-watchers">documentation</a>,
+       <em>one example</em> of possible response is:</p>
+
+    <pre><code>Status: 200 OK
+Link: &lt;https://api.github.com/resource?page=2&gt;; rel="next",
+      &lt;https://api.github.com/resource?page=5&gt;; rel="last"
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4999
+</code></pre>
+
+    <pre><code>[
+  {
+    <span class="string">"login"</span>: <span class="string">"octocat"</span>,
+    <span class="string">"id"</span>: <span class="number">1</span>,
+    <span class="string">"avatar_url"</span>: <span class="string">"https://github.com/images/error/octocat_happy.gif"</span>,
+    <span class="string">"gravatar_id"</span>: <span class="string">"somehexcode"</span>,
+    <span class="string">"url"</span>: <span class="string">"https://api.github.com/users/octocat"</span>
+  }
+]</code></pre>
+
+    <p>What <strong>promises</strong> is this example-based documentation making to the API consumers?<br />
+       If you had to <em>parse</em> the result based solely on one example, you would be filled with doubts like:</p>
+
+    <ul>
+      <li>will the status code <em>always</em> be <code>200</code>?</li>
+      <li>will the body <em>always</em> return a JSON <code>array</code>?</li>
+      <li>will the array <em>always</em> include only one element?</li>
+      <li>will each element <em>always</em> have a <code>login</code> attribute with the value <code>"octocat"</code>?</li>
+      <li>will the <code>id</code> attribute <em>always</em> have an <code>integer</code> value?</li>
+      <li>will the <code>avatar_url</code> attribute <em>always</em> have a value?</li>
+    </ul>
+
+    <h2>The power of RSpec API to the rescue</h2>
+
+    <p>RSpec API provides a new, concise and readable way to document the promises of the endpoint above:</p>
+
+    <pre><code>resource <span class="string">'Watchers'</span>, <span class="symbol">format:</span> <span class="symbol">:json</span> do
+  has_attribute <span class="symbol">:login</span>, <span class="symbol">:string</span>
+  has_attribute <span class="symbol">:id</span>, <span class="symbol">:integer</span>
+  has_attribute <span class="symbol">:avatar_url</span>, <span class="symbol">:url</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
+  has_attribute <span class="symbol">:gravatar_id</span>, <span class="symbol">:string</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
+  has_attribute <span class="symbol">:url</span>, <span class="symbol">:url</span>
+
+  get <span class="string">'https://api.github.com/repos/:owner/:repo/subscribers'</span>, <span class="symbol">array:</span> <span class="constant">true</span> do
+    request <span class="symbol">owner:</span> existing(<span class="symbol">:user</span>), <span class="symbol">repo:</span> existing(<span class="symbol">:repo</span>) do
+      respond_with <span class="symbol">:ok</span>
+    end
+
+    request <span class="symbol">owner:</span> unknown(<span class="symbol">:user</span>), <span class="symbol">repo:</span> unknown(<span class="symbol">:repo</span>) do
+      respond_with <span class="symbol">:not_found</span>
+    end
+  end
+end</code></pre>
+
+    <p>This snippet of code is a more comprehensive <strong>documentation</strong> than an example-based one.<br />
+       Even though the returned data from the endpoint might differ from call to call, the consumer can <em>always</em> expect:</p>
+
+     <ul>
+       <li>a status code of <code>200</code> when given an existing owner/repo</li>
+       <li>a body of <code>JSON content-type</code></li>
+       <li>the body to be an <code>array</code> of items, each representing a watcher</li>
+       <li>each watcher to have a <code>login</code> attribute with a <code>string</code> value</li>
+       <li>each watcher to have an <code>id</code> attribute with an <code>integer</code> value</li>
+       <li>each watcher to have an <code>avatar_url</code> attribute with either a <code>URL</code> or a <code>nil</code> value</li>
+       <li>each watcher to have a <code>gravatar_id</code> attribute with either a <code>string</code> or a <code>nil</code> value</li>
+       <li>each watcher to have a <code>url</code> attribute with a <code>URL</code> value</li>
+       <li>a status code of <code>404</code> when given an unknown owner/repo</li>
+     </ul>
+
+     <p>The best part of RSpec API is that you can actually <strong>verify</strong> that GitHub is keeping its API promises
+        at any given time, by <strong>executing</strong> the snippet of code above through RSpec and ensuring everything is green:</p>
+
+    <pre class="request"><code>$ rspec spec/features/remote/github/activity/watchers_spec.rb</code></pre>
+
+    <pre><code>Watchers
+  GET https://api.github.com/repos/:owner/:repo/subscribers
+    given an existing owner "rspec-api" and an existing repo "rspec-api"
+      responds with a status code that
+        <span class="success">should be 200</span>
+      responds with headers that
+        <span class="success">should include 'Content-Type': 'application/json; charset=utf-8'</span>
+      responds with a body that
+        <span class="success">should be a JSON Array</span>
+        <span class="success">should include the attribute "login" with a string value</span>
+        <span class="success">should include the attribute "id" with an integer value</span>
+        <span class="success">should include the attribute "avatar_url" with a URL or nil value</span>
+        <span class="success">should include the attribute "gravatar_id" with a string or nil value</span>
+        <span class="success">should include the attribute "url" with a URL value</span>
+    given an unknown owner "i-don-t-exist" and an unknown repo "not-a-repo"
+      responds with a status code that
+        <span class="success">should be 404</span></code></pre>
+
+        <p>Now, go and run this code for yourself, then tell me what you think.
+           All you need is a GitHub API key (<a href="https://github.com/rspec-api/rspec-api#the-github-api-example">instructions</a>).</p>
+  </article>
+
+  <footer>
+    <nav class="prev">
+      <a href="index.html" alt="1. A basic example">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+    </nav>
+    <h1>Want to know more?</h1>
+
+    <p>RSpec API aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
+    <p>It is still under development, and you can follow its progress by <a href="http://github.com/rspec-api/rspec-api">checking out the code on Github</a>.</p>
+    <p>Other features not included in the basic examples above are:</p>
+
+    <ul>
+      <li>support for other HTTP verbs, e.g.: <code>POST /concerts</code></li>
+      <li>support for more attribute types, such as <code>boolean</code></li>
+      <li>support for nested routes, e.g.: <code>GET /locations/woodstock/concerts</code></li>
+      <li>support for filters, e.g.: <code>GET /concerts?when=1969</code></li>
+      <li>support for sorting, e.g.: <code>GET /concerts?sort=when</code></li>
+      <li>support for pagination, e.g.: <code>GET /concerts?page=2</code></li>
+      <li>support for JSONP callbacks, e.g.: <code>GET /concerts?callback=my_function</code></li>
+    </ul>
+
+    <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=watch" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=fork" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=claudiob&amp;type=follow" width="132" height="20"></iframe>
+  </footer>
+  <a href="https://github.com/rspec-api/rspec-api">
+    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpec API on GitHub">
+  </a>
+</body>
+</html>

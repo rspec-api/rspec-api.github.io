@@ -3,10 +3,15 @@ body        {font-family: Helvetica, Arial, sans-serif}
 
 body        {font-size: 0.85em; line-height: 1.5em}
 header      {font-size: 1.40em; line-height: 1.4em}
-h1          {font-size: 1.50em}
+h1, nav     {font-size: 1.50em}
 h2          {font-size: 1.20em}
 code        {font-size: 1.15em; line-height: 1.2em}
 li          {font-size: 1.00em; line-height: 1.7em}
+nav a       {font-size: 0.70em}
+
+h1          {text-align: center}
+nav.left    {text-align: left}
+nav.next    {text-align: right}
 
 /* COLORS */
 body           {background-color: #ffffff; color: #393939}
@@ -23,10 +28,14 @@ ul code        {border-color: #cccccc; border-style: solid}
 
 /* SIZES */
 header,
-article       {width: 720px;}
-header img    {width: 48px; height: 48px;}
+article,
+footer        {width: 720px}
+header img    {width: 48px; height: 48px}
+nav           {min-width: 100px}
 
 /* LAYOUT */
+nav.prev       {float: left}
+nav.next,
 header img     {float: right}
 header         {clear: both}
 pre            {overflow:auto}
@@ -34,12 +43,14 @@ ul code        {display: inline-block}
 .ribbon        {position: fixed; top: 0; left: 0}
 
 body, header,
-article        {margin-left: auto; margin-right: auto}
+article,
+footer         {margin-left: auto; margin-right: auto}
 body           {margin-top: 5px; padding: 0px}
 header         {margin-top: 10px; margin-bottom: 40px}
 header img     {margin-left: 24px}
 p              {margin: 1em 0}
-h1             {margin: 2em 0 1em; padding: .5em 0}
+h1             {margin: 2em 0 1em}
+h1, nav        {padding: .5em 0}
 h2             {margin: 2.5em auto 1em}
 ul             {margin: 1.5em}
 pre            {margin: 0px; padding: 10px}
