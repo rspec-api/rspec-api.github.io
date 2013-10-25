@@ -53,7 +53,7 @@ Content-Type: application/json; charset=utf-8
       <li>the headers to include a <code>JSON content-type</code> indication</li>
       <li>the body to be an <code>array</code> of items, each representing a concert</li>
       <li>each concert to have a <code>where</code> attribute with a <code>string</code> value</li>
-      <li>each concert to have a <code>year</code> attribute with an <code>integer</code> value</li>
+      <li>each concert to have a <code>year</code> attribute with a <code>numeric</code> value</li>
       <li>each concert to have an <code>array</code> of performers</li>
       <li>each performer to have a <code>name</code> attribute with a <code>string</code> value</li>
       <li>each performer to have a <code>website</code> attribute with a <code>URL</code> or <code>nil</code> value</li>
@@ -63,12 +63,12 @@ Content-Type: application/json; charset=utf-8
 
     <p>RSpec API provides a concise and readable way to express the set of promises listed above:</p>
 
-    <pre><code>resource <span class="string">'Concerts'</span>, <span class="symbol">format:</span> <span class="symbol">:json</span> do
+    <pre><code>resource <span class="string">'Concerts'</span> do
   has_attribute <span class="symbol">:where</span>, <span class="symbol">:string</span>
-  has_attribute <span class="symbol">:year</span>, <span class="symbol">:integer</span>
+  has_attribute <span class="symbol">:year</span>, <span class="symbol">:number</span>
   has_attribute <span class="symbol">:performers</span>, <span class="symbol">:array</span> do
     has_attribute <span class="symbol">:name</span>, <span class="symbol">:string</span>
-    has_attribute <span class="symbol">:website</span>, <span class="symbol">:url</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
+    has_attribute <span class="symbol">:website</span>, <span class="symbol">:string</span>, <span class="symbol">format:</span> <span class="symbol">:url</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
   end
 
   get <span class="string">'/concerts'</span>, <span class="symbol">array:</span> <span class="constant">true</span> do
@@ -93,7 +93,7 @@ end</code></pre>
       responds with a body that
         <span class="success">should be a JSON Array</span>
         <span class="success">should include the attribute "where" with a string value</span>
-        <span class="success">should include the attribute "year" with an integer value</span>
+        <span class="success">should include the attribute "year" with a numeric value</span>
         <span class="success">should include the attribute "performers" array, where each item</span>
           <span class="success">should include the attribute "name" with a string value</span>
           <span class="success">should include the attribute "website" with a URL or nil value</span></code></pre>
