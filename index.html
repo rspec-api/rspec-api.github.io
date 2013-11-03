@@ -40,7 +40,7 @@ Content-Type: application/json; charset=utf-8
   {
     <span class="string">"where"</span>: <span class="string">"Coachella"</span>, <span class="string">"year"</span>: <span class="number">2013</span>,
     <span class="string">"performers"</span>: [
-      {<span class="string">"name"</span>: <span class="string">"Grizzly Bear"</span>, <span class="string">"website"</span>: <span class="number">nil</span>}
+      {<span class="string">"name"</span>: <span class="string">"Grizzly Bear"</span>, <span class="string">"website"</span>: <span class="number">null</span>}
     ]
   }
 ]</code></pre>
@@ -53,22 +53,22 @@ Content-Type: application/json; charset=utf-8
       <li>the headers to include a <code>JSON content-type</code> indication</li>
       <li>the body to be an <code>array</code> of items, each representing a concert</li>
       <li>each concert to have a <code>where</code> attribute with a <code>string</code> value</li>
-      <li>each concert to have a <code>year</code> attribute with a <code>numeric</code> value</li>
+      <li>each concert to have a <code>year</code> attribute with a <code>numeric</code> value of <code>integer</code> format</li>
       <li>each concert to have an <code>array</code> of performers</li>
       <li>each performer to have a <code>name</code> attribute with a <code>string</code> value</li>
-      <li>each performer to have a <code>website</code> attribute with a <code>URL</code> or <code>nil</code> value</li>
+      <li>each performer to have a <code>website</code> attribute with either a <code>null</code> or a <code>string</code> in <code>URL</code> format</li>
     </ul>
 
     <h2>The power of RSpec API to the rescue</h2>
 
     <p>RSpec API provides a concise and readable way to express the set of promises listed above:</p>
 
-    <pre><code>resource <span class="string">'Concerts'</span> do
-  has_attribute <span class="symbol">:where</span>, <span class="symbol">:string</span>
-  has_attribute <span class="symbol">:year</span>, <span class="symbol">:number</span>
-  has_attribute <span class="symbol">:performers</span>, <span class="symbol">:array</span> do
-    has_attribute <span class="symbol">:name</span>, <span class="symbol">:string</span>
-    has_attribute <span class="symbol">:website</span>, <span class="symbol">:string</span>, <span class="symbol">format:</span> <span class="symbol">:url</span>, <span class="symbol">can_be_nil:</span> <span class="constant">true</span>
+    <pre><code>resource <span class="symbol">:concert</span> do
+  has_attribute <span class="symbol">:where</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+  has_attribute <span class="symbol">:year</span>, <span class="symbol">type:</span> {<span class="symbol">number:</span> <span class="symbol">:integer</span>}
+  has_attribute <span class="symbol">:performers</span>, <span class="symbol">type:</span> <span class="symbol">:array</span> do
+    has_attribute <span class="symbol">:name</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+    has_attribute <span class="symbol">:website</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">string:</span> <span class="symbol">:url</span>]
   end
 
   get <span class="string">'/concerts'</span>, <span class="symbol">array:</span> <span class="constant">true</span> do
