@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>An introduction to RSpec API</title>
+  <title>An introduction to RSpecApi</title>
   <link href="rspec-api.css" media="all" rel="stylesheet" type="text/css">
 </head>
 <body>
   <header>
-    <img src="rspec-api-logo.png" alt="RSpec API">
+    <img src="rspec-api-logo.png" alt="RSpecApi">
     <p>When you write a web API, you make a promise to the world.<br />
-       RSpec API helps you keep your promise.</p>
+       RSpecApi helps you keep your promise.</p>
   </header>
 
   <article>
     <nav class="prev">
-      <a href="index.html" alt="1. A basic example">&larr; Page 1</a>
+      <a href="howto.html" title="How to write tests with RSpecApi">&larr; Page 2</a>
     </nav>
     <nav class="next">
     </nav>
@@ -56,25 +56,23 @@ X-RateLimit-Remaining: 4999
       <li>will the <code>avatar_url</code> attribute <em>always</em> have a value?</li>
     </ul>
 
-    <h2>The power of RSpec API to the rescue</h2>
+    <h2>The power of RSpecApi to the rescue</h2>
 
-    <p>RSpec API provides a new, concise and readable way to document the promises of the endpoint above:</p>
+    <p>RSpecApi provides a new, concise and readable way to document the promises of the endpoint above:</p>
 
-    <pre><code>resource <span class="string">'Watchers'</span> do
-  has_attribute <span class="symbol">:login</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
-  has_attribute <span class="symbol">:id</span>, <span class="symbol">type:</span> <span class="symbol">:number</span>
-  has_attribute <span class="symbol">:avatar_url</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">string:</span> <span class="symbol">:url</span>]
-  has_attribute <span class="symbol">:gravatar_id</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">:string</span>]
-  has_attribute <span class="symbol">:url</span>, <span class="symbol">type:</span> {<span class="symbol">string:</span> <span class="symbol">:url</span>}
+    <pre><code><span class="method">resource</span> <span class="symbol">:watcher</span> do
+  <span class="method">host</span> <span class="string">'https://api.github.com'</span>
+  <span class="method">authorize_with</span> <span class="string">'YOUR-GITHUB-PERSONAL-API-TOKEN'</span>
 
-  get <span class="string">'https://api.github.com/repos/:owner/:repo/subscribers'</span>, <span class="symbol">array:</span> <span class="constant">true</span> do
-    request <span class="symbol">owner:</span> existing(<span class="symbol">:user</span>), <span class="symbol">repo:</span> existing(<span class="symbol">:repo</span>) do
-      respond_with <span class="symbol">:ok</span>
-    end
+  <span class="method">has_attribute</span> <span class="symbol">:login</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+  <span class="method">has_attribute</span> <span class="symbol">:id</span>, <span class="symbol">type:</span> <span class="symbol">:number</span>
+  <span class="method">has_attribute</span> <span class="symbol">:avatar_url</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, {<span class="symbol">string:</span> <span class="symbol">:url</span>}]
+  <span class="method">has_attribute</span> <span class="symbol">:gravatar_id</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">:string</span>]
+  <span class="method">has_attribute</span> <span class="symbol">:url</span>, <span class="symbol">type:</span> {<span class="symbol">string:</span> <span class="symbol">:url</span>}
 
-    request <span class="symbol">owner:</span> unknown(<span class="symbol">:user</span>), <span class="symbol">repo:</span> unknown(<span class="symbol">:repo</span>) do
-      respond_with <span class="symbol">:not_found</span>
-    end
+  <span class="method">get</span> <span class="string">'/repos/:owner/:repo/subscribers'</span>, <span class="symbol">collection:</span> <span class="constant">true</span> do
+    <span class="method">respond_with</span> <span class="symbol">:ok</span>, <span class="symbol">owner:</span> <span class="method">existing</span>(<span class="symbol">:user</span>), <span class="symbol">repo:</span> <span class="method">existing</span>(<span class="symbol">:repo</span>)
+    <span class="method">respond_with</span> <span class="symbol">:not_found</span>, <span class="symbol">owner:</span> <span class="method">unknown</span>(<span class="symbol">:user</span>), <span class="symbol">repo:</span> <span class="method">unknown</span>(<span class="symbol">:repo</span>)
   end
 end</code></pre>
 
@@ -93,7 +91,7 @@ end</code></pre>
        <li>a status code of <code>404</code> when given an unknown owner/repo</li>
      </ul>
 
-     <p>The best part of RSpec API is that you can actually <strong>verify</strong> that GitHub is keeping its API promises
+     <p>The best part of RSpecApi is that you can actually <strong>verify</strong> that GitHub is keeping its API promises
         at any given time, by <strong>executing</strong> the snippet of code above through RSpec and ensuring everything is green:</p>
 
     <pre class="request"><code>$ rspec spec/features/remote/github/activity/watchers_spec.rb</code></pre>
@@ -122,33 +120,32 @@ end</code></pre>
 
   <footer>
     <nav class="prev">
-      <a href="index.html" alt="1. A basic example">&larr; Page 1</a>
+      <a href="howto.html" title="How to write tests with RSpecApi">&larr; Page 2</a>
     </nav>
     <nav class="next">
     </nav>
     <h1>Want to know more?</h1>
 
-    <p>RSpec API aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
+    <p>RSpecApi aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
     <p>It is still under development, and you can follow its progress by <a href="http://github.com/rspec-api/rspec-api">checking out the code on Github</a>.</p>
-    <p>Other features not included in the basic examples above are:</p>
-
+    <p>RSpecApi extends the <abbr title="Domain Specific Language">DSL</abbr> provided by RSpec with the following methods:</p>
     <ul>
-      <li>support for other HTTP verbs, e.g.: <code>POST /concerts</code></li>
-      <li>support for more attribute types, such as <code>boolean</code></li>
-      <li>support for nested routes, e.g.: <code>GET /locations/woodstock/concerts</code></li>
-      <li>support for filters, e.g.: <code>GET /concerts?when=1969</code></li>
-      <li>support for sorting, e.g.: <code>GET /concerts?sort=when</code></li>
-      <li>support for pagination, e.g.: <code>GET /concerts?page=2</code></li>
-      <li>support for JSONP callbacks, e.g.: <code>GET /concerts?callback=my_function</code></li>
+      <li><code>resource</code> describes a RESTful API resource</li>
+      <li><code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code> indicate the actions available on the resource</li>
+      <li><code>respond_with</code> sends a request to the API and verifies that the response meets the expectations</li>
+      <li><code>has_attribute</code> lists the expected attributes in the response body</li>
+      <li><code>accept</code> allows to make parametrized requests for filters, sorting, pagination and callbacks</li>
+      <li><code>host</code> and <code>adapter</code> specify how to access the API, either locally or remotely</li>
+      <li><code>authorize_with</code> provides authentication credentials to the request</li>
+      <li><code>throttle</code> prevents &lsquo;Too Many Requests&rsquo; errors</li>
     </ul>
-
-    <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>
+    <p>If you are interested, <a href="howto.html" title="How to write tests with RSpecApi">continue to the next page</a> to learn how to use these methods.</p>
     <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=watch" width="62" height="20"></iframe>
     <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=fork" width="62" height="20"></iframe>
     <iframe src="http://ghbtns.com/github-btn.html?user=claudiob&amp;type=follow" width="132" height="20"></iframe>
   </footer>
   <a href="https://github.com/rspec-api/rspec-api">
-    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpec API on GitHub">
+    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpecApi on GitHub">
   </a>
 </body>
 </html>

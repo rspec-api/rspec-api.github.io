@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>An introduction to RSpecApi</title>
+  <link href="rspec-api.css" media="all" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <header>
+    <img src="rspec-api-logo.png" alt="RSpecApi">
+    <p>When you write a web API, you make a promise to the world.<br />
+       RSpecApi helps you keep your promise.</p>
+  </header>
+
+  <article>
+    <nav class="prev">
+      <a href="index.html" title="1. Concise tests for resourceful web APIs">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+    </nav>
+    <h1>A basic example</h1>
+    <p>You wrote a simple Concerts API that only accepts one request:</p>
+
+    <pre class="request"><code>GET /concerts</code></pre>
+
+    <p>and responds with this kind of data:</p>
+
+    <pre><code>Status: 200 OK
+Content-Type: application/json; charset=utf-8
+</code></pre>
+
+    <pre><code>[
+  {
+    <span class="string">"where"</span>: <span class="string">"Woodstock"</span>, <span class="string">"year"</span>: <span class="number">1969</span>,
+    <span class="string">"performers"</span>: [
+      {<span class="string">"name"</span>: <span class="string">"Jimi Hendrix"</span>, <span class="string">"website"</span>: <span class="string">"http://jimihendrix.com"</span>},
+      {<span class="string">"name"</span>: <span class="string">"Janis Joplin"</span>, <span class="string">"website"</span>: <span class="string">"http://janisjoplin.com"</span>}
+    ]
+  },
+  {
+    <span class="string">"where"</span>: <span class="string">"Coachella"</span>, <span class="string">"year"</span>: <span class="number">2013</span>,
+    <span class="string">"performers"</span>: [
+      {<span class="string">"name"</span>: <span class="string">"Grizzly Bear"</span>, <span class="string">"website"</span>: <span class="number">null</span>}
+    ]
+  }
+]</code></pre>
+
+    <p>Such a simple API is inherently making many <strong>promises</strong> to its consumers.<br />
+       Even though the returned <em>data</em> might differ from call to call, the consumer should always <em>expect</em>:</p>
+
+    <ul>
+      <li>the status code to be <code>200</code></li>
+      <li>the headers to include a <code>JSON content-type</code> indication</li>
+      <li>the body to be an <code>array</code> of items, each representing a concert</li>
+      <li>each concert to have a <code>where</code> attribute with a <code>string</code> value</li>
+      <li>each concert to have a <code>year</code> attribute with a <code>numeric</code> value of <code>integer</code> format</li>
+      <li>each concert to have an <code>array</code> of performers</li>
+      <li>each performer to have a <code>name</code> attribute with a <code>string</code> value</li>
+      <li>each performer to have a <code>website</code> attribute with either a <code>null</code> or a <code>string</code> in <code>URL</code> format</li>
+    </ul>
+
+    <h2>The power of RSpecApi to the rescue</h2>
+
+    <p>RSpecApi provides a concise and readable way to express the set of promises listed above:</p>
+
+    <pre><code>resource <span class="symbol">:concert</span> do
+  has_attribute <span class="symbol">:where</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+  has_attribute <span class="symbol">:year</span>, <span class="symbol">type:</span> {<span class="symbol">number:</span> <span class="symbol">:integer</span>}
+  has_attribute <span class="symbol">:performers</span>, <span class="symbol">type:</span> <span class="symbol">:array</span> do
+    has_attribute <span class="symbol">:name</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+    has_attribute <span class="symbol">:website</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">string:</span> <span class="symbol">:url</span>]
+  end
+
+  get <span class="string">'/concerts'</span>, <span class="symbol">collection:</span> <span class="constant">true</span> do
+    respond_with <span class="symbol">:ok</span>
+  end
+end</code></pre>
+
+    <p>This snippet code is not only a meaningful <strong>documentation</strong> of the promises set by the API.<br />
+       It is also a <strong>test</strong> that can be run by RSpec to ensure the promises are kept:</p>
+
+    <pre class="request"><code>$ rspec spec/features/concerts_spec.rb</code></pre>
+
+    <pre><code>Concerts
+  GET /concerts
+    by default
+      responds with a status code that
+        <span class="success">should be 200</span>
+      responds with headers that
+        <span class="success">should include 'Content-Type': 'application/json; charset=utf-8'</span>
+      responds with a body that
+        <span class="success">should be a JSON Array</span>
+        <span class="success">should include the attribute "where" with a string value</span>
+        <span class="success">should include the attribute "year" with a numeric value</span>
+        <span class="success">should include the attribute "performers" array, where each item</span>
+          <span class="success">should include the attribute "name" with a string value</span>
+          <span class="success">should include the attribute "website" with a URL or nil value</span></code></pre>
+
+        <p>Now, go and run this code for yourself, then tell me what you think.
+           All you need is RSpecApi (<a href="https://github.com/rspec-api/rspec-api#a-basic-example">instructions</a>).</p>
+  </article>
+
+  <footer>
+    <nav class="prev">
+      <a href="index.html" title="1. Concise tests for resourceful web APIs">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+    </nav>
+    <h1>Want to know more?</h1>
+
+    <p>RSpecApi aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
+    <p>It is still under development, and you can follow its progress by <a href="http://github.com/rspec-api/rspec-api">checking out the code on Github</a>.</p>
+    <p>The example above only shows some of the features of RSpecApi, which allows developers to:</p>
+
+    <ol>
+      <!--li>Concise tests for resourceful web APIs</li-->
+      <li>describe a resource with the <code>resource</code> method</li>
+      <li>indicate the endpoints with <code>get</code>, <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code></li>
+      <li>specify the expectations on the response with <code>respond_with</code></li>
+      <li>list the attributes expected in a resource with <code>has_attribute</code></li>
+      <li>test the support for filters, sorting, pagination, callbacks with <code>accept</code></li>
+      <li>work on local applications with <code>adapter</code></li>
+      <li>provide authentication credentials with <code>authorize_with</code></li>
+      <li>avoid &ldquo;Too Many Requests&rdquo; errors with <code>throttle</code></li>
+    </ol>
+
+    <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=watch" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=fork" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=claudiob&amp;type=follow" width="132" height="20"></iframe>
+  </footer>
+  <a href="https://github.com/rspec-api/rspec-api">
+    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpecApi on GitHub">
+  </a>
+</body>
+</html>

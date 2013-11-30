@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>An introduction to RSpecApi</title>
+  <link href="rspec-api.css" media="all" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <header>
+    <img src="rspec-api-logo.png" alt="RSpecApi">
+    <p>When you write a web API, you make a promise to the world.<br />
+       RSpecApi helps you keep your promise.</p>
+  </header>
+
+  <article>
+    <nav class="prev">
+      <a href="index.html" title="Concise tests for resourceful web APIs">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+      <a href="github.html" title="The GitHub API example">Page 3 &rarr;</a>
+    </nav>
+    <h1>How to write tests with RSpecApi</h1>
+    <p>RSpecApi extends the <abbr title="Domain Specific Language">DSL</abbr> provided by RSpec with the following methods:</p>
+    <ul>
+      <li><code>resource</code> describes a RESTful API resource</li>
+      <li><code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code> indicate the actions available on the resource</li>
+      <li><code>respond_with</code> sends a request to the API and verifies that the response meets the expectations</li>
+      <li><code>has_attribute</code> lists the expected attributes in the response body</li>
+      <li><code>accept</code> allows to make parametrized requests for filters, sorting, pagination and callbacks</li>
+      <li><code>host</code> and <code>adapter</code> specify how to access the API, either locally or remotely</li>
+      <li><code>authorize_with</code> provides authentication credentials to the request</li>
+      <li><code>throttle</code> prevents &lsquo;Too Many Requests&rsquo; errors</li>
+    </ul>
+
+    <p>The next example introduced on Page 1 will be the starting point to illustrate these methods and how to use them:</p>
+    <pre><span class="file">concerts_spec.rb</span><code><span class="method">resource</span> <span class="symbol">:concert</span> do
+  <span class="method">host</span> <span class="string">'http://myconcerts.herokuapp.com'</span>
+
+  <span class="method">has_attribute</span> <span class="symbol">:id</span>, <span class="symbol">type:</span> {<span class="symbol">number:</span> <span class="symbol">:integer</span>}
+  <span class="method">has_attribute</span> <span class="symbol">:where</span>, <span class="symbol">type:</span> <span class="symbol">:string</span>
+  <span class="method">has_attribute</span> <span class="symbol">:website</span>, <span class="symbol">type:</span> [<span class="symbol">:null</span>, <span class="symbol">string:</span> <span class="symbol">:url</span>]
+
+  <span class="method">get</span> <span class="string">'/concerts'</span>, <span class="symbol">collection:</span> <span class="constant">true</span> do
+    <span class="method">respond_with</span> <span class="symbol">:ok</span>
+  end
+
+  <span class="method">post</span> <span class="string">'/concerts'</span> do
+    <span class="method">respond_with</span> <span class="symbol">:created</span>, <span class="symbol">concert:</span> {<span class="symbol">where:</span> <span class="string">'Coachella'</span>}
+    <span class="method">respond_with</span> <span class="symbol">:unprocessable_entity</span>, <span class="symbol">concert:</span> {<span class="symbol">where:</span> <span class="constant">nil</span>}
+  end
+end</code></pre>
+
+    <h2 id="resource">
+      <a class="anchor" href="#resource"></a><code>resource</code>
+    </h2>
+    <p>RSpecApi makes some assumptions on the web APIs to be tested, based on <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api" title="Best Practices for Designing a Pragmatic RESTful API">a set of popular best practices</a>.<br />
+      The first assumption is that the API should follow the key principles of <abbr title="REpresentational State Transfer">REST</abbr>, which</p>
+    <blockquote>
+     &ldquo;&hellip; involve separating your API into logical resources.
+     These resources are manipulated using HTTP requests where the method (GET, POST, PUT, PATCH, DELETE) has specific meaning.&rdquo;
+    </blockquote>
+    <p>The method <code>resource</code> helps separate API tests by resource, as in:</p>
+
+    <pre><code><span class="method">resource</span> <span class="symbol">:concert</span> do
+  <span class="comment"># Here list the actions to access a concert resource</span>
+  <span class="comment"># e.g. get '/concerts', post '/concerts', delete '/concerts/:id'</span>
+end
+
+<span class="method">resource</span> <span class="symbol">:artist</span> do
+  <span class="comment"># Here list the actions to access an artist resource</span>
+  <span class="comment"># e.g. patch '/artists/:id', get '/country/:country/artists'</span>
+end</code></pre>
+
+    <p>There is not a lot of magic in this method: a look at its <a href="https://github.com/rspec-api/rspec-api/blob/master/lib/rspec-api/resource.rb">source code</a>
+      reveals how it is mostly syntactic sugar around RSpec’s <code>describe</code>. The code above is indeed equivalent to:</p>
+
+    <pre><code><span class="method">describe</span> <span class="string">"Concerts"</span> do
+  <span class="method">extend</span> <span class="constant">RSpecApi::Resource</span>
+  <span class="comment"># Here list the actions to access a concert resource</span>
+  <span class="comment"># e.g. get '/concerts', post '/concerts', delete '/concerts/:id'</span>
+end
+
+<span class="method">describe</span> <span class="string">"Artists"</span> do
+  <span class="method">extend</span> <span class="constant">RSpecApi::Resource</span>
+  <span class="comment"># Here list the actions to access an artist resource</span>
+  <span class="comment"># e.g. patch '/artists/:id', get '/country/:country/artists'</span>
+end</code></pre>
+
+    <p>In short, <code>resource</code> creates an example group to describe an API resource,
+      and makes available inside that group the methods <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code> of <code>RSpecApi::Resource</code>
+      which are detailed hereafter.</p>
+
+    <h2 id="actions">
+      <a class="anchor" href="#actions"></a><code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, <code>delete</code>
+    </h2>
+
+    <p>The next best practice that RSpecApi expects from an API is that resources can be
+      accessed with HTTP methods:</p>
+
+    <blockquote>
+     &ldquo;Once you have your resources defined, you need to identify what actions apply to them and how those would map to your API.
+     RESTful principles provide strategies to handle <abbr title="Create, read, update and delete">CRUD</abbr>
+     actions using HTTP methods [&hellip;] GET, POST, PUT, PATCH, DELETE.&rdquo;
+    </blockquote>
+
+    <p>The methods <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code>
+      help describe the actions available for each resource, as in:</p>
+
+    <pre><code><span class="method">resource</span> <span class="symbol">:concert</span> do
+  <span class="method">get</span> <span class="string">'/concerts'</span>, <span class="symbol">collection:</span> <span class="constant">true</span> do
+    <span class="comment"># Here describe the expectations of GET /concerts</span>
+  end
+
+  <span class="method">post</span> <span class="string">'/concerts'</span> do
+    <span class="comment"># Here describe the expectations of POST /concerts</span>
+  end
+end</code></pre>
+
+    <p>There is not a lot of magic in these methods either: a look at the <a href="https://github.com/rspec-api/rspec-api/blob/master/lib/rspec-api/resource/actions.rb">source code</a>
+  reveals how they are mostly syntactic sugar around RSpec’s <code>describe</code>. The code above is indeed equivalent to:</p>
+
+    <pre><code><span class="method">resource</span> <span class="symbol">:concert</span> do
+  <span class="method">describe</span> <span class="string">"Retrieving a list of concerts"</span>, <span class="symbol">rspec_api_params:</span> {<span class="symbol">action:</span> <span class="symbol">:get</span>, <span class="symbol">route:</span> <span class="string">"/concerts"</span>, <span class="symbol">collection:</span> <span class="constant">true</span>} do
+    <span class="method">extend</span> <span class="constant">RSpecApi::Requests</span>
+    <span class="comment"># Here describe the expectations of GET /concerts</span>
+  end
+
+  <span class="method">describe</span> <span class="string">"Creating one concert"</span>, <span class="symbol">rspec_api_params:</span> {<span class="symbol">action:</span> <span class="symbol">:post</span>, <span class="symbol">route:</span> <span class="string">"/concerts"</span>} do
+    <span class="method">extend</span> <span class="constant">RSpecApi::Requests</span>
+    <span class="comment"># Here describe the expectations of POST /concerts</span>
+  end
+end</code></pre>
+
+  <p>In short, <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code>, and <code>delete</code>
+    create example groups to describe actions to access API resources. Inside each example group:</p>
+
+    <ul>
+      <li>the description is automatically generated from the resource name and the action;</li>
+      <li>the route, the action and any other optional argument are passed through using RSpec’s metadata;</li>
+      <li>the method <code>respond_with</code> of <code>RSpecApi::Requests</code> is available, which is detailed hereafter.</li>
+    </ul>
+
+    <h2 id="respond_with">
+      <a class="anchor" href="#respond_with"></a><code>respond_with</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+
+    <h2 id="has_attribute">
+      <a class="anchor" href="#has_attribute"></a><code>has_attribute</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+
+    <h2 id="accept">
+      <a class="anchor" href="#accept"></a><code>accept</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+
+    <h2 id="faraday">
+      <a class="anchor" href="#faraday"></a><code>host</code>, <code>adapter</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+
+    <h2 id="authorize_with">
+      <a class="anchor" href="#authorize_with"></a><code>authorize_with</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+
+    <h2 id="throttle">
+      <a class="anchor" href="#throttle"></a><code>throttle</code>
+    </h2>
+    <p><em>Coming soon&hellip;</em></p>
+  </article>
+
+  <footer>
+    <nav class="prev">
+      <a href="index.html" title="Concise tests for resourceful web APIs">&larr; Page 1</a>
+    </nav>
+    <nav class="next">
+      <a href="github.html" title="The GitHub API example">Page 3 &rarr;</a>
+    </nav>
+    <h1>Want to know more?</h1>
+
+    <p>RSpecApi aims to make it easy to document and test <a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api">pragmatic RESTful web APIs</a>.</p>
+    <p>It is still under development, and you can follow its progress by <a href="http://github.com/rspec-api/rspec-api">checking out the code on Github</a>.</p>
+
+    <p>If you are interested, star or fork the Github repository, or follow me! Thanks :)</p>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=watch" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rspec-api&amp;repo=rspec-api&amp;type=fork" width="62" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=claudiob&amp;type=follow" width="132" height="20"></iframe>
+  </footer>
+  <a href="https://github.com/rspec-api/rspec-api">
+    <img class="ribbon" src="github-ribbon.png" alt="Fork RSpecApi on GitHub">
+  </a>
+</body>
+</html>
